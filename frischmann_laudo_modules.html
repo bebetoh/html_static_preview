@@ -151,6 +151,56 @@
       pointer-events: none;
     }
 
+    /* Grupo de busca e controle de largura */
+    .search-wrapper-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      flex: 1;
+      max-width: 650px;
+    }
+
+    .width-control-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .width-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100px;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--border-color);
+      outline: none;
+      transition: background 0.2s ease;
+    }
+
+    .width-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+
+    .width-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: var(--primary-hover);
+    }
+
     /* Filtros rápidos */
     .filters-wrapper {
       display: flex;
@@ -618,6 +668,7 @@
       const [searchTerm, setSearchTerm] = useState('');
       const [selectedSeverity, setSelectedSeverity] = useState('all');
       const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+      const [containerWidth, setContainerWidth] = useState(95);
 
       // Larguras iniciais das colunas em pixels (null = usa CSS)
       const INITIAL_WIDTHS = { id: null, name: null, interpretation: null, severity: null, reason: null, attention: null, recommendation: null };
@@ -746,23 +797,39 @@
       };
 
       return html`
-        <div className="container">
+        <div className="container" style=${{ width: `${containerWidth}%` }}>
           <header>
             <h1>Laudo Frischmann - Resumo de Atenção (Modules)</h1>
             <p className="subtitle">Visualização estruturada e interativa dos seus exames laboratoriais via ES Modules.</p>
           </header>
 
           <div className="controls-card">
-            <div className="search-wrapper">
-              <${SearchIcon} />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Buscar exames, motivos ou recomendações..."
-                value=${searchTerm}
-                onInput=${(e) => setSearchTerm(e.target.value)}
-                aria-label="Buscar exames"
-              />
+            <div className="search-wrapper-group">
+              <div className="search-wrapper">
+                <${SearchIcon} />
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Buscar exames, motivos ou recomendações..."
+                  value=${searchTerm}
+                  onInput=${(e) => setSearchTerm(e.target.value)}
+                  aria-label="Buscar exames"
+                />
+              </div>
+
+              <div className="width-control-wrapper">
+                <span>Tela: <strong>${containerWidth}%</strong></span>
+                <input
+                  type="range"
+                  className="width-slider"
+                  min="50"
+                  max="100"
+                  value=${containerWidth}
+                  onInput=${(e) => setContainerWidth(Number(e.target.value))}
+                  title="Ajustar largura da tela"
+                  aria-label="Ajustar largura da tela"
+                />
+              </div>
             </div>
 
             <div className="filters-wrapper">
