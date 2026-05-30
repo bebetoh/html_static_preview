@@ -737,10 +737,10 @@
     }
 
     const severityLabels = {
-      critico: "Crítico",
-      alto: "Alto",
-      moderado: "Moderado",
-      baixo: "Baixo",
+      critico: "Crítica",
+      alto: "Alta",
+      moderado: "Moderada",
+      baixo: "Baixa",
       normal: "Normal"
     };
 
@@ -953,25 +953,25 @@
                   className={`filter-btn filter-btn-critico ${selectedSeverity === 'critico' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('critico')}
                 >
-                  CRÍTICO <span className="filter-count">{counts.critico || 0}</span>
+                  CRÍTICA <span className="filter-count">{counts.critico || 0}</span>
                 </button>
                 <button
                   className={`filter-btn filter-btn-alto ${selectedSeverity === 'alto' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('alto')}
                 >
-                  ALTO <span className="filter-count">{counts.alto || 0}</span>
+                  ALTA <span className="filter-count">{counts.alto || 0}</span>
                 </button>
                 <button
                   className={`filter-btn filter-btn-moderado ${selectedSeverity === 'moderado' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('moderado')}
                 >
-                  MODERADO <span className="filter-count">{counts.moderado || 0}</span>
+                  MODERADA <span className="filter-count">{counts.moderado || 0}</span>
                 </button>
                 <button
                   className={`filter-btn filter-btn-baixo ${selectedSeverity === 'baixo' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('baixo')}
                 >
-                  BAIXO <span className="filter-count">{counts.baixo || 0}</span>
+                  BAIXA <span className="filter-count">{counts.baixo || 0}</span>
                 </button>
                 <button
                   className={`filter-btn filter-btn-normal ${selectedSeverity === 'normal' ? 'active' : ''}`}
@@ -1055,19 +1055,19 @@
               <div className="legend-list">
                 <div className="legend-item">
                   <div className="legend-indicator indicator-critico"></div>
-                  <span>Crítico (Alteração clínica mais relevante)</span>
+                  <span>Crítica (Alteração clínica mais relevante)</span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-indicator indicator-alto"></div>
-                  <span>Alto (Alteração metabólica importante)</span>
+                  <span>Alta (Alteração metabólica importante)</span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-indicator indicator-moderado"></div>
-                  <span>Moderado (Atenção moderada ou limítrofe)</span>
+                  <span>Moderada (Atenção moderada ou limítrofe)</span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-indicator indicator-baixo"></div>
-                  <span>Baixo (Atenção baseada em sintomas)</span>
+                  <span>Baixa (Atenção baseada em sintomas)</span>
                 </div>
                 <div className="legend-item">
                   <div className="legend-indicator indicator-normal"></div>
