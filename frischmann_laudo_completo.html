@@ -162,43 +162,51 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 500;
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 700;
       font-family: inherit;
-      color: var(--text-secondary);
-      background: #f1f5f9;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
       border: 1px solid transparent;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
+      /* Estilo padrão: "Todos" — usa cor primária teal */
+      background: #f0fdf4;
+      color: #134e4a;
     }
 
     .filter-btn:hover {
-      background: #e2e8f0;
-      color: var(--text-primary);
+      filter: brightness(0.94);
     }
 
+    /* Botão ativo: borda sólida para destacar seleção */
     .filter-btn.active {
-      background: var(--primary-color);
-      color: #ffffff;
+      outline: 2px solid currentColor;
+      outline-offset: 1px;
+      filter: brightness(0.9);
     }
+
+    /* Variantes por severidade — espelham exatamente os badges */
+    .filter-btn-todos   { background: #f0fdf4; color: #134e4a; }
+    .filter-btn-critico { background: var(--bg-critico); color: var(--text-critico); }
+    .filter-btn-alto    { background: var(--bg-alto);    color: var(--text-alto); }
+    .filter-btn-moderado{ background: var(--bg-moderado); color: var(--text-moderado); }
+    .filter-btn-baixo   { background: var(--bg-baixo);   color: var(--text-baixo); }
+    .filter-btn-normal  { background: var(--bg-normal);  color: var(--text-normal); }
 
     .filter-count {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.10);
       color: currentColor;
-    }
-
-    .filter-btn.active .filter-count {
-      background: rgba(255, 255, 255, 0.2);
     }
 
     /* Tabela */
@@ -637,40 +645,40 @@
 
             <div className="filters-wrapper">
               <button 
-                className={`filter-btn ${selectedSeverity === 'all' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-todos ${selectedSeverity === 'all' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('all')}
               >
-                Todos <span className="filter-count">{counts.all}</span>
+                TODOS <span className="filter-count">{counts.all}</span>
               </button>
               <button 
-                className={`filter-btn ${selectedSeverity === 'critico' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-critico ${selectedSeverity === 'critico' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('critico')}
               >
-                Crítico <span className="filter-count">{counts.critico || 0}</span>
+                CRÍTICO <span className="filter-count">{counts.critico || 0}</span>
               </button>
               <button 
-                className={`filter-btn ${selectedSeverity === 'alto' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-alto ${selectedSeverity === 'alto' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('alto')}
               >
-                Alto <span className="filter-count">{counts.alto || 0}</span>
+                ALTO <span className="filter-count">{counts.alto || 0}</span>
               </button>
               <button 
-                className={`filter-btn ${selectedSeverity === 'moderado' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-moderado ${selectedSeverity === 'moderado' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('moderado')}
               >
-                Moderado <span className="filter-count">{counts.moderado || 0}</span>
+                MODERADO <span className="filter-count">{counts.moderado || 0}</span>
               </button>
               <button 
-                className={`filter-btn ${selectedSeverity === 'baixo' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-baixo ${selectedSeverity === 'baixo' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('baixo')}
               >
-                Baixo <span className="filter-count">{counts.baixo || 0}</span>
+                BAIXO <span className="filter-count">{counts.baixo || 0}</span>
               </button>
               <button 
-                className={`filter-btn ${selectedSeverity === 'normal' ? 'active' : ''}`}
+                className={`filter-btn filter-btn-normal ${selectedSeverity === 'normal' ? 'active' : ''}`}
                 onClick={() => handleFilterClick('normal')}
               >
-                Normal <span className="filter-count">{counts.normal || 0}</span>
+                NORMAL <span className="filter-count">{counts.normal || 0}</span>
               </button>
             </div>
           </div>
