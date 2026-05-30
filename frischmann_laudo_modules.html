@@ -72,7 +72,8 @@
     }
 
     .container {
-      max-width: 1400px;
+      width: 95%;
+      max-width: 100%;
       margin: 0 auto;
     }
 
@@ -230,13 +231,13 @@
     }
 
     /* Distribuição de larguras das colunas */
-    .col-id { width: 4%; min-width: 50px; }
-    .col-exames { width: 17%; min-width: 160px; }
-    .col-interpretacao { width: 10%; min-width: 120px; }
-    .col-severidade { width: 9%; min-width: 105px; }
-    .col-motivo { width: 18%; min-width: 190px; }
-    .col-atencao { width: 19%; min-width: 200px; }
-    .col-recomendacao { width: 23%; min-width: 230px; }
+    .col-id { width: 3%; min-width: 45px; }
+    .col-exames { width: 12%; min-width: 130px; }
+    .col-interpretacao { width: 8%; min-width: 100px; }
+    .col-severidade { width: 7%; min-width: 90px; }
+    .col-motivo { width: 21%; min-width: 220px; }
+    .col-atencao { width: 22%; min-width: 240px; }
+    .col-recomendacao { width: 27%; min-width: 300px; }
 
     /* Handle de redimensionamento de coluna */
     .resize-handle {
@@ -598,7 +599,7 @@
           ref=${el => { thRefs.current[colKey] = el; }}
           onClick=${() => onSort(sortKey)}
           className=${`${className} ${isActive ? 'active' : ''}`}
-          style=${width ? `width:${width}px;min-width:60px` : ''}
+          style=${width ? { width: `${width}px`, minWidth: '60px' } : undefined}
         >
           <div className="th-content">
             ${label} <${SortIcon} active=${isActive} direction=${sortConfig.direction} />
