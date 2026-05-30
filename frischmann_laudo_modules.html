@@ -238,7 +238,44 @@
     .col-atencao { width: 19%; min-width: 200px; }
     .col-recomendacao { width: 23%; min-width: 230px; }
 
+    /* Handle de redimensionamento de coluna */
+    .resize-handle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 6px;
+      cursor: col-resize;
+      user-select: none;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      background: linear-gradient(to right, transparent 40%, var(--border-color) 40%, var(--border-color) 60%, transparent 60%);
+    }
+
+    th:hover .resize-handle,
+    th.resizing .resize-handle {
+      opacity: 1;
+    }
+
+    th.resizing .resize-handle {
+      background: linear-gradient(to right, transparent 40%, var(--primary-color) 40%, var(--primary-color) 60%, transparent 60%);
+    }
+
+    /* Impede seleção de texto durante o drag */
+    body.col-resizing {
+      cursor: col-resize;
+      user-select: none;
+    }
+    body.col-resizing * {
+      pointer-events: none;
+    }
+    body.col-resizing .resize-handle {
+      pointer-events: all;
+    }
+
     th {
+      position: relative;
       font-family: 'Outfit', sans-serif;
       font-size: 12px;
       font-weight: 700;
@@ -246,12 +283,13 @@
       letter-spacing: 0.05em;
       color: var(--text-secondary);
       background: #f8fafc;
-      padding: 16px 18px;
+      padding: 16px 24px 16px 18px;
       border-bottom: 1px solid var(--border-color);
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
       transition: background-color 0.2s ease, color 0.2s ease;
+      overflow: hidden;
     }
 
     th:hover {
@@ -438,7 +476,7 @@
 
   <!-- Código React escrito com HTM, executado de forma modular nativa, sem necessidade de transpilação -->
   <script type="module">
-    import React, { useState, useMemo } from 'react';
+    import React, { useState, useMemo, useCallback, useRef } from 'react';
     import ReactDOM from 'react-dom';
     import htm from 'htm';
 
@@ -555,6 +593,81 @@
       const [searchTerm, setSearchTerm] = useState('');
       const [selectedSeverity, setSelectedSeverity] = useState('all');
       const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+
+      // Larguras iniciais das colunas em pixels (null = usa CSS)
+      const INITIAL_WIDTHS = { id: null, name: null, interpretation: null, severity: null, reason: null, attention: null, recommendation: null };
+      const [colWidths, setColWidths] = useState(INITIAL_WIDTHS);
+
+      // Ref para dados de drag — não causa re-render durante o arrasto
+      const dragRef = useRef(null);
+      const thRefs = useRef({});
+
+      // Handler de início do resize — useCallback para referência estável
+      const handleResizeStart = useCallback((colKey, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const th = thRefs.current[colKey];
+        if (!th) return;
+
+        const startX = e.clientX;
+        const startWidth = th.getBoundingClientRect().width;
+
+        dragRef.current = { colKey, startX, startWidth };
+        document.body.classList.add('col-resizing');
+        th.classList.add('resizing');
+
+        const onMouseMove = (moveEvent) => {
+          const { startX, startWidth, colKey } = dragRef.current;
+          const delta = moveEvent.clientX - startX;
+          const newWidth = Math.max(60, startWidth + delta);
+          thRefs.current[colKey].style.width = newWidth + 'px';
+        };
+
+        const onMouseUp = (upEvent) => {
+          const { startX, startWidth, colKey } = dragRef.current;
+          const delta = upEvent.clientX - startX;
+          const newWidth = Math.max(60, startWidth + delta);
+
+          setColWidths(prev => ({ ...prev, [colKey]: newWidth }));
+
+          document.body.classList.remove('col-resizing');
+          if (thRefs.current[colKey]) {
+            thRefs.current[colKey].classList.remove('resizing');
+          }
+          dragRef.current = null;
+
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }, []);
+
+      // Função de header redimensionável para htm
+      const ResizableHeader = ({ colKey, className, label, sortKey }) => {
+        const isActive = sortConfig.key === sortKey;
+        const width = colWidths[colKey];
+        return html`
+          <th
+            ref=${el => { thRefs.current[colKey] = el; }}
+            onClick=${() => handleSort(sortKey)}
+            className=${`${className} ${isActive ? 'active' : ''}`}
+            style=${width ? `width:${width}px;min-width:60px` : ''}
+          >
+            <div className="th-content">
+              ${label} <${SortIcon} active=${isActive} direction=${sortConfig.direction} />
+            </div>
+            <div
+              className="resize-handle"
+              onMouseDown=${(e) => handleResizeStart(colKey, e)}
+              onClick=${(e) => e.stopPropagation()}
+              title="Arraste para redimensionar"
+            />
+          </th>
+        `;
+      };
 
       // Contagem para os botões de filtros rápidos
       const counts = useMemo(() => {
@@ -696,41 +809,13 @@
               <table>
                 <thead>
                   <tr>
-                    <th onClick=${() => handleSort('id')} className=${`col-id ${sortConfig.key === 'id' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        # <${SortIcon} active=${sortConfig.key === 'id'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('name')} className=${`col-exames ${sortConfig.key === 'name' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Exames <${SortIcon} active=${sortConfig.key === 'name'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('interpretation')} className=${`col-interpretacao ${sortConfig.key === 'interpretation' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Interpretação <${SortIcon} active=${sortConfig.key === 'interpretation'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('severity')} className=${`col-severidade ${sortConfig.key === 'severity' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Severidade <${SortIcon} active=${sortConfig.key === 'severity'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('reason')} className=${`col-motivo ${sortConfig.key === 'reason' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Motivo <${SortIcon} active=${sortConfig.key === 'reason'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('attention')} className=${`col-atencao ${sortConfig.key === 'attention' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Ponto de Atenção <${SortIcon} active=${sortConfig.key === 'attention'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
-                    <th onClick=${() => handleSort('recommendation')} className=${`col-recomendacao ${sortConfig.key === 'recommendation' ? 'active' : ''}`}>
-                      <div className="th-content">
-                        Possível Recomendação <${SortIcon} active=${sortConfig.key === 'recommendation'} direction=${sortConfig.direction} />
-                      </div>
-                    </th>
+                    <${ResizableHeader} colKey="id"             className="col-id"           label="#"                    sortKey="id" />
+                    <${ResizableHeader} colKey="name"           className="col-exames"        label="Exames"               sortKey="name" />
+                    <${ResizableHeader} colKey="interpretation" className="col-interpretacao" label="Interpretação"         sortKey="interpretation" />
+                    <${ResizableHeader} colKey="severity"       className="col-severidade"    label="Severidade"           sortKey="severity" />
+                    <${ResizableHeader} colKey="reason"         className="col-motivo"        label="Motivo"               sortKey="reason" />
+                    <${ResizableHeader} colKey="attention"      className="col-atencao"       label="Ponto de Atenção"     sortKey="attention" />
+                    <${ResizableHeader} colKey="recommendation" className="col-recomendacao"  label="Possível Recomendação" sortKey="recommendation" />
                   </tr>
                 </thead>
                 <tbody>
