@@ -476,20 +476,7 @@
       background-color: #f8fafc;
     }
 
-    .exam-name {
-      font-weight: 600;
-      color: var(--text-primary);
-      font-size: 14px;
-      white-space: nowrap;
-    }
 
-    .exam-part {
-      margin-bottom: 4px;
-    }
-
-    .exam-part:last-child {
-      margin-bottom: 0;
-    }
 
     .badge-list {
       display: flex;
@@ -508,6 +495,11 @@
       text-transform: uppercase;
       letter-spacing: 0.02em;
       white-space: nowrap;
+    }
+
+    .badge-exam {
+      text-transform: none;
+      font-size: 12px;
     }
 
     .badge-critico {
@@ -565,6 +557,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
+      justify-content: center;
     }
 
     .legend-item {
@@ -1012,8 +1005,17 @@
           sortedExams.map((item) => html`
                       <tr key=${item.id} className=${`row-hover row-${item.severity}`}>
                         <td>${item.id}</td>
-                        <td className="exam-name">
-                          ${item.name.split(' + ').map((part, idx) => html`<div key=${idx} className="exam-part">${part}</div>`)}
+                        <td>
+                          <div className="badge-list">
+                            ${item.name.split(' + ').map((part, idx) => {
+                              const partSeverity = item.interpretation[idx] ? item.interpretation[idx].severity : item.severity;
+                              return html`
+                                <span key=${idx} className=${`badge badge-exam badge-${partSeverity}`}>
+                                  ${part}
+                                </span>
+                              `;
+                            })}
+                          </div>
                         </td>
                         <td>
                           <div className="badge-list">
@@ -1049,7 +1051,7 @@
           </div>
         </div>
 
-        <div className="container-legend">
+        <div className="container-legend" style=${{ width: `${containerWidth}%` }}>
           <div className="legend-card">
             <div className="legend-title">Legenda de Cores de Atenção</div>
             <div className="legend-list">
