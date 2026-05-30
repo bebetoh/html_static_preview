@@ -71,8 +71,15 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      width: 95%;
+    .container-controls,
+    .container-legend {
+      width: 65%;
+      max-width: 100%;
+      margin: 0 auto;
+      transition: width 0.3s ease;
+    }
+
+    .container-table {
       max-width: 100%;
       margin: 0 auto;
     }
@@ -507,6 +514,11 @@
         padding: 2px 6px;
         font-size: 10px;
       }
+
+      .container-controls,
+      .container-legend {
+        width: 95%;
+      }
     }
   </style>
   
@@ -797,7 +809,7 @@
       };
 
       return html`
-        <div className="container" style=${{ width: `${containerWidth}%` }}>
+        <div className="container-controls">
           <header>
             <h1>Laudo Frischmann - Resumo de Atenção (Modules)</h1>
             <p className="subtitle">Visualização estruturada e interativa dos seus exames laboratoriais via ES Modules.</p>
@@ -818,7 +830,7 @@
               </div>
 
               <div className="width-control-wrapper">
-                <span>Tela: <strong>${containerWidth}%</strong></span>
+                <span>Tabela: <strong>${containerWidth}%</strong></span>
                 <input
                   type="range"
                   className="width-slider"
@@ -826,8 +838,8 @@
                   max="100"
                   value=${containerWidth}
                   onInput=${(e) => setContainerWidth(Number(e.target.value))}
-                  title="Ajustar largura da tela"
-                  aria-label="Ajustar largura da tela"
+                  title="Ajustar largura da tabela"
+                  aria-label="Ajustar largura da tabela"
                 />
               </div>
             </div>
@@ -871,7 +883,9 @@
               </button>
             </div>
           </div>
+        </div>
 
+        <div className="container-table" style=${{ width: `${containerWidth}%` }}>
           <div className="table-container">
             <div className="table-responsive">
               <table>
@@ -925,7 +939,9 @@
               </table>
             </div>
           </div>
+        </div>
 
+        <div className="container-legend">
           <div className="legend-card">
             <div className="legend-title">Legenda de Cores de Atenção</div>
             <div className="legend-list">
