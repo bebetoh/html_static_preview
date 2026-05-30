@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laudo Frischmann - Resumo Interativo</title>
-  <meta name="description" content="Resumo interativo e detalhado do laudo de exames Frischmann, contendo interpretação, motivos, pontos de atenção e possíveis recomendações.">
-  
+  <meta name="description"
+    content="Resumo interativo e detalhado do laudo de exames Frischmann, contendo interpretação, motivos, pontos de atenção e possíveis recomendações.">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Laudo Frischmann - Resumo Interativo">
-  <meta property="og:description" content="Visualize e filtre os resultados dos seus exames de forma simples, interativa e estruturada.">
-  
+  <meta property="og:description"
+    content="Visualize e filtre os resultados dos seus exames de forma simples, interativa e estruturada.">
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
+
   <style>
     /* Estilos CSS do Design Premium */
     :root {
@@ -25,32 +30,33 @@
       --text-secondary: #475569;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
-      
+
       --color-critico: #dc2626;
       --bg-critico: #fef2f2;
       --text-critico: #991b1b;
-      
+
       --color-alto: #ea580c;
       --bg-alto: #fff7ed;
       --text-alto: #9a3412;
-      
+
       --color-moderado: #d97706;
       --bg-moderado: #fefbeb;
       --text-moderado: #92400e;
-      
+
       --color-baixo: #0284c7;
       --bg-baixo: #f0f9ff;
       --text-baixo: #075985;
-      
+
       --color-normal: #16a34a;
       --bg-normal: #f0fdf4;
       --text-normal: #166534;
-      
+
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      
-      --primary-color: #0f766e; /* Teal médico escuro, sem roxo! */
+
+      --primary-color: #0f766e;
+      /* Teal médico escuro, sem roxo! */
       --primary-hover: #115e59;
       --primary-light: #ccfbf1;
       --primary-text: #134e4a;
@@ -248,12 +254,35 @@
     }
 
     /* Variantes por severidade — espelham exatamente os badges */
-    .filter-btn-todos   { background: #f0fdf4; color: #134e4a; }
-    .filter-btn-critico { background: var(--bg-critico); color: var(--text-critico); }
-    .filter-btn-alto    { background: var(--bg-alto);    color: var(--text-alto); }
-    .filter-btn-moderado{ background: var(--bg-moderado); color: var(--text-moderado); }
-    .filter-btn-baixo   { background: var(--bg-baixo);   color: var(--text-baixo); }
-    .filter-btn-normal  { background: var(--bg-normal);  color: var(--text-normal); }
+    .filter-btn-todos {
+      background: #f0fdf4;
+      color: #134e4a;
+    }
+
+    .filter-btn-critico {
+      background: var(--bg-critico);
+      color: var(--text-critico);
+    }
+
+    .filter-btn-alto {
+      background: var(--bg-alto);
+      color: var(--text-alto);
+    }
+
+    .filter-btn-moderado {
+      background: var(--bg-moderado);
+      color: var(--text-moderado);
+    }
+
+    .filter-btn-baixo {
+      background: var(--bg-baixo);
+      color: var(--text-baixo);
+    }
+
+    .filter-btn-normal {
+      background: var(--bg-normal);
+      color: var(--text-normal);
+    }
 
     .filter-count {
       display: inline-flex;
@@ -288,13 +317,40 @@
     }
 
     /* Distribuição de larguras das colunas */
-    .col-id { width: 3%; min-width: 45px; }
-    .col-exames { width: 12%; min-width: 130px; }
-    .col-interpretacao { width: 8%; min-width: 100px; }
-    .col-severidade { width: 7%; min-width: 90px; }
-    .col-motivo { width: 21%; min-width: 220px; }
-    .col-atencao { width: 22%; min-width: 240px; }
-    .col-recomendacao { width: 27%; min-width: 300px; }
+    .col-id {
+      width: 3%;
+      min-width: 45px;
+    }
+
+    .col-exames {
+      width: 12%;
+      min-width: 130px;
+    }
+
+    .col-interpretacao {
+      width: 8%;
+      min-width: 100px;
+    }
+
+    .col-severidade {
+      width: 7%;
+      min-width: 90px;
+    }
+
+    .col-motivo {
+      width: 21%;
+      min-width: 220px;
+    }
+
+    .col-atencao {
+      width: 22%;
+      min-width: 240px;
+    }
+
+    .col-recomendacao {
+      width: 27%;
+      min-width: 300px;
+    }
 
     /* Handle de redimensionamento de coluna */
     .resize-handle {
@@ -325,9 +381,11 @@
       cursor: col-resize;
       user-select: none;
     }
+
     body.col-resizing * {
       pointer-events: none;
     }
+
     body.col-resizing .resize-handle {
       pointer-events: all;
     }
@@ -394,11 +452,25 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    tr.row-critico { border-left: 4px solid var(--color-critico); }
-    tr.row-alto { border-left: 4px solid var(--color-alto); }
-    tr.row-moderado { border-left: 4px solid var(--color-moderado); }
-    tr.row-baixo { border-left: 4px solid var(--color-baixo); }
-    tr.row-normal { border-left: 4px solid var(--color-normal); }
+    tr.row-critico {
+      border-left: 4px solid var(--color-critico);
+    }
+
+    tr.row-alto {
+      border-left: 4px solid var(--color-alto);
+    }
+
+    tr.row-moderado {
+      border-left: 4px solid var(--color-moderado);
+    }
+
+    tr.row-baixo {
+      border-left: 4px solid var(--color-baixo);
+    }
+
+    tr.row-normal {
+      border-left: 4px solid var(--color-normal);
+    }
 
     /* Efeito de hover nas linhas */
     tr.row-hover:hover td {
@@ -409,22 +481,22 @@
       font-weight: 600;
       color: var(--text-primary);
       font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .exam-part {
+      margin-bottom: 4px;
+    }
+
+    .exam-part:last-child {
+      margin-bottom: 0;
     }
 
     .badge-list {
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .mais {
-      display: inline-block;
-      margin: 0 4px;
-      font-weight: 800;
-      color: var(--text-secondary);
-      user-select: none;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
     }
 
     .badge {
@@ -439,11 +511,30 @@
       white-space: nowrap;
     }
 
-    .badge-critico { background: var(--bg-critico); color: var(--text-critico); }
-    .badge-alto { background: var(--bg-alto); color: var(--text-alto); }
-    .badge-moderado { background: var(--bg-moderado); color: var(--text-moderado); }
-    .badge-baixo { background: var(--bg-baixo); color: var(--text-baixo); }
-    .badge-normal { background: var(--bg-normal); color: var(--text-normal); }
+    .badge-critico {
+      background: var(--bg-critico);
+      color: var(--text-critico);
+    }
+
+    .badge-alto {
+      background: var(--bg-alto);
+      color: var(--text-alto);
+    }
+
+    .badge-moderado {
+      background: var(--bg-moderado);
+      color: var(--text-moderado);
+    }
+
+    .badge-baixo {
+      background: var(--bg-baixo);
+      color: var(--text-baixo);
+    }
+
+    .badge-normal {
+      background: var(--bg-normal);
+      color: var(--text-normal);
+    }
 
     .no-results {
       padding: 48px;
@@ -491,26 +582,41 @@
       border-radius: 3px;
     }
 
-    .indicator-critico { background: var(--color-critico); }
-    .indicator-alto { background: var(--color-alto); }
-    .indicator-moderado { background: var(--color-moderado); }
-    .indicator-baixo { background: var(--color-baixo); }
-    .indicator-normal { background: var(--color-normal); }
+    .indicator-critico {
+      background: var(--color-critico);
+    }
+
+    .indicator-alto {
+      background: var(--color-alto);
+    }
+
+    .indicator-moderado {
+      background: var(--color-moderado);
+    }
+
+    .indicator-baixo {
+      background: var(--color-baixo);
+    }
+
+    .indicator-normal {
+      background: var(--color-normal);
+    }
 
     /* Responsividade */
     @media (max-width: 768px) {
       body {
         padding: 16px 8px;
       }
-      
+
       h1 {
         font-size: 22px;
       }
-      
-      th, td {
+
+      th,
+      td {
         padding: 12px;
       }
-      
+
       .badge {
         padding: 2px 6px;
         font-size: 10px;
@@ -522,14 +628,15 @@
       }
     }
   </style>
-  
+
   <!-- Importando as dependências do React e ReactDOM via CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
+
   <!-- Compilador Babel Standalone para rodar JSX localmente -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
+
 <body>
 
   <div id="root"></div>
@@ -611,7 +718,7 @@
       },
       {
         id: 7,
-        name: "Hemograma, plaquetas, vitamina B12 e tireoide",
+        name: "Hemograma, plaquetas, + vitamina B12 e tireoide",
         interpretation: [
           { text: "Normal ou sem alteração relevante", severity: "normal" }
         ],
@@ -742,9 +849,9 @@
       const filteredExams = useMemo(() => {
         return initialExams.filter(item => {
           const matchesFilter = selectedSeverity === 'all' || item.severity === selectedSeverity;
-          
+
           const searchLower = searchTerm.toLowerCase();
-          const matchesSearch = 
+          const matchesSearch =
             item.name.toLowerCase().includes(searchLower) ||
             item.reason.toLowerCase().includes(searchLower) ||
             item.attention.toLowerCase().includes(searchLower) ||
@@ -761,7 +868,7 @@
 
         return [...filteredExams].sort((a, b) => {
           let valA, valB;
-          
+
           if (sortConfig.key === 'id') {
             valA = a.id;
             valB = b.id;
@@ -843,37 +950,37 @@
               </div>
 
               <div className="filters-wrapper">
-                <button 
+                <button
                   className={`filter-btn filter-btn-todos ${selectedSeverity === 'all' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('all')}
                 >
                   TODOS <span className="filter-count">{counts.all}</span>
                 </button>
-                <button 
+                <button
                   className={`filter-btn filter-btn-critico ${selectedSeverity === 'critico' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('critico')}
                 >
                   CRÍTICO <span className="filter-count">{counts.critico || 0}</span>
                 </button>
-                <button 
+                <button
                   className={`filter-btn filter-btn-alto ${selectedSeverity === 'alto' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('alto')}
                 >
                   ALTO <span className="filter-count">{counts.alto || 0}</span>
                 </button>
-                <button 
+                <button
                   className={`filter-btn filter-btn-moderado ${selectedSeverity === 'moderado' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('moderado')}
                 >
                   MODERADO <span className="filter-count">{counts.moderado || 0}</span>
                 </button>
-                <button 
+                <button
                   className={`filter-btn filter-btn-baixo ${selectedSeverity === 'baixo' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('baixo')}
                 >
                   BAIXO <span className="filter-count">{counts.baixo || 0}</span>
                 </button>
-                <button 
+                <button
                   className={`filter-btn filter-btn-normal ${selectedSeverity === 'normal' ? 'active' : ''}`}
                   onClick={() => handleFilterClick('normal')}
                 >
@@ -890,13 +997,13 @@
                 <table>
                   <thead>
                     <tr>
-                      <ResizableHeader colKey="id"             className="col-id"           label="#"                    sortKey="id"             sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="name"           className="col-exames"        label="Exames"               sortKey="name"           sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="interpretation" className="col-interpretacao" label="Interpretação"         sortKey="interpretation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="severity"       className="col-severidade"    label="Severidade"           sortKey="severity"       sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="reason"         className="col-motivo"        label="Motivo"               sortKey="reason"         sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="attention"      className="col-atencao"       label="Ponto de Atenção"     sortKey="attention"      sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
-                      <ResizableHeader colKey="recommendation" className="col-recomendacao"  label="Possível Recomendação" sortKey="recommendation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="id" className="col-id" label="#" sortKey="id" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="name" className="col-exames" label="Exames" sortKey="name" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="interpretation" className="col-interpretacao" label="Interpretação" sortKey="interpretation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="severity" className="col-severidade" label="Severidade" sortKey="severity" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="reason" className="col-motivo" label="Motivo" sortKey="reason" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="attention" className="col-atencao" label="Ponto de Atenção" sortKey="attention" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                      <ResizableHeader colKey="recommendation" className="col-recomendacao" label="Possível Recomendação" sortKey="recommendation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
                     </tr>
                   </thead>
                   <tbody>
@@ -904,16 +1011,17 @@
                       sortedExams.map((item) => (
                         <tr key={item.id} className={`row-hover row-${item.severity}`}>
                           <td>{item.id}</td>
-                          <td className="exam-name">{item.name}</td>
+                          <td className="exam-name">
+                            {item.name.split(' + ').map((part, idx) => (
+                              <div key={idx} className="exam-part">{part}</div>
+                            ))}
+                          </td>
                           <td>
                             <div className="badge-list">
                               {item.interpretation.map((badge, idx) => (
-                                <React.Fragment key={idx}>
-                                  {idx > 0 && <span className="mais">+</span>}
-                                  <span className={`badge badge-${badge.severity}`}>
-                                    {badge.text}
-                                  </span>
-                                </React.Fragment>
+                                <span key={idx} className={`badge badge-${badge.severity}`}>
+                                  {badge.text}
+                                </span>
                               ))}
                             </div>
                           </td>
@@ -977,4 +1085,5 @@
   </script>
 
 </body>
+
 </html>
