@@ -581,6 +581,32 @@
       normal: "Normal"
     };
 
+    // Componente externo e estável — definido fora de ReportApp para que o React nunca o
+    // considere um tipo diferente entre re-renders (corrige React error #62)
+    function ResizableHeader({ colKey, className, label, sortKey, sortConfig, colWidths, thRefs, onSort, onResizeStart }) {
+      const isActive = sortConfig.key === sortKey;
+      const width = colWidths[colKey];
+      return (
+        <th
+          ref={el => { thRefs.current[colKey] = el; }}
+          onClick={() => onSort(sortKey)}
+          className={`${className} ${isActive ? 'active' : ''}`}
+          style={width ? { width: width + 'px', minWidth: '60px' } : undefined}
+        >
+          <div className="th-content">
+            {label} <SortIcon active={isActive} direction={sortConfig.direction} />
+          </div>
+          <div
+            className="resize-handle"
+            onMouseDown={(e) => onResizeStart(colKey, e)}
+            onClick={(e) => e.stopPropagation()}
+            title="Arraste para redimensionar"
+            aria-label={`Redimensionar coluna ${label}`}
+          />
+        </th>
+      );
+    }
+
     function ReportApp() {
       const [searchTerm, setSearchTerm] = useState('');
       const [selectedSeverity, setSelectedSeverity] = useState('all');
@@ -638,31 +664,6 @@
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
       }, []);
-
-      // Componente do header redimensionável — isolado para evitar re-renders da tabela inteira
-      const ResizableHeader = useCallback(({ colKey, className, label, sortKey, children }) => {
-        const isActive = sortConfig.key === sortKey;
-        const width = colWidths[colKey];
-        return (
-          <th
-            ref={el => { thRefs.current[colKey] = el; }}
-            onClick={() => handleSort(sortKey)}
-            className={`${className} ${isActive ? 'active' : ''}`}
-            style={width ? { width: width + 'px', minWidth: '60px' } : undefined}
-          >
-            <div className="th-content">
-              {label} <SortIcon active={isActive} direction={sortConfig.direction} />
-            </div>
-            <div
-              className="resize-handle"
-              onMouseDown={(e) => handleResizeStart(colKey, e)}
-              onClick={(e) => e.stopPropagation()}
-              title="Arraste para redimensionar"
-              aria-label={`Redimensionar coluna ${label}`}
-            />
-          </th>
-        );
-      }, [sortConfig, colWidths, handleResizeStart]);
 
       // Contagem para os botões de filtros rápidos
       const counts = useMemo(() => {
@@ -806,13 +807,13 @@
               <table>
                 <thead>
                   <tr>
-                    <ResizableHeader colKey="id"             className="col-id"           label="#"                    sortKey="id" />
-                    <ResizableHeader colKey="name"           className="col-exames"        label="Exames"               sortKey="name" />
-                    <ResizableHeader colKey="interpretation" className="col-interpretacao" label="Interpretação"         sortKey="interpretation" />
-                    <ResizableHeader colKey="severity"       className="col-severidade"    label="Severidade"           sortKey="severity" />
-                    <ResizableHeader colKey="reason"         className="col-motivo"        label="Motivo"               sortKey="reason" />
-                    <ResizableHeader colKey="attention"      className="col-atencao"       label="Ponto de Atenção"     sortKey="attention" />
-                    <ResizableHeader colKey="recommendation" className="col-recomendacao"  label="Possível Recomendação" sortKey="recommendation" />
+                    <ResizableHeader colKey="id"             className="col-id"           label="#"                    sortKey="id"             sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="name"           className="col-exames"        label="Exames"               sortKey="name"           sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="interpretation" className="col-interpretacao" label="Interpretação"         sortKey="interpretation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="severity"       className="col-severidade"    label="Severidade"           sortKey="severity"       sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="reason"         className="col-motivo"        label="Motivo"               sortKey="reason"         sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="attention"      className="col-atencao"       label="Ponto de Atenção"     sortKey="attention"      sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
+                    <ResizableHeader colKey="recommendation" className="col-recomendacao"  label="Possível Recomendação" sortKey="recommendation" sortConfig={sortConfig} colWidths={colWidths} thRefs={thRefs} onSort={handleSort} onResizeStart={handleResizeStart} />
                   </tr>
                 </thead>
                 <tbody>
