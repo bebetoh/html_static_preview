@@ -1,0 +1,8 @@
+# Configurações do Git para ignorar pastas de agentes e metadados
+.agents/
+.gemini/
+.idea/
+.vscode/
+*.log
+Thumbs.db
+.DS_Store
