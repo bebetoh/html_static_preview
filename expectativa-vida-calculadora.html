@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!--
+    ============================================================
+    WebApp: Calculadora de Tempo Vivido e Expectativa de Vida
+    ============================================================
+
+    Objetivo:
+    ---------
+    Este arquivo HTML implementa uma calculadora simples para estimar:
+
+    1. Tempo já vivido por uma pessoa.
+    2. Tempo restante estimado com base em referências de expectativa
+       média de vida.
+    3. Percentual de vida já vivido.
+    4. Percentual de vida restante.
+    5. Conversões em anos, meses, semanas e dias.
+
+    Características:
+    ----------------
+    - Aplicação 100% client-side.
+    - Não usa backend.
+    - Não usa bibliotecas externas.
+    - Não envia dados para nenhum servidor.
+    - Salva as referências personalizadas no localStorage do navegador.
+    - Funciona abrindo o arquivo diretamente no navegador.
+
+    Fórmulas utilizadas:
+    --------------------
+    meses   = anos * 12
+    semanas = anos * 52,1429
+    dias    = anos * 365,25
+
+    Observação:
+    -----------
+    Os cálculos são apenas estatísticos. Expectativa de vida não é uma
+    previsão individual, pois depende de saúde, genética, hábitos,
+    ambiente, país, acesso médico e outros fatores.
+  -->
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Calculadora de Expectativa de Vida</title>
+
+  <style>
+    /*
+      ============================================================
+      1. Variáveis visuais globais
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Centralizar as cores principais da aplicação para facilitar
+      personalização futura.
+    */
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --card-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #10b981;
+      --accent-2: #f59e0b;
+      --accent-3: #ef4444;
+      --danger: #ef4444;
+      --input-bg: #020617;
+    }
+
+    /*
+      ============================================================
+      2. Reset básico
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Garantir cálculo de largura previsível nos elementos.
+    */
+    * {
+      box-sizing: border-box;
+    }
+
+    /*
+      ============================================================
+      3. Layout base da página
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Definir fonte, fundo, cor padrão e espaçamento geral.
+    */
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #020617, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /*
+      ============================================================
+      4. Grid principal
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Organizar a aplicação em duas áreas:
+      - painel lateral de parâmetros;
+      - área principal com resumo e tabelas.
+    */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: 360px 1fr;
+      }
+    }
+
+    /*
+      ============================================================
+      5. Cards
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Padronizar os blocos visuais da interface.
+    */
+    .card {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin: 0 0 14px;
+    }
+
+    /*
+      ============================================================
+      6. Campos de formulário
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Estilizar inputs, selects e agrupamentos de campos.
+    */
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    /*
+      ============================================================
+      7. Botões
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Definir aparência e variações dos botões de ação.
+    */
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #001018;
+      background: var(--accent);
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.15s;
+    }
+
+    button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--card-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: var(--accent-2);
+      color: #001307;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    /*
+      ============================================================
+      8. Tabela de resultado
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Exibir a comparação entre as referências de expectativa de vida.
+    */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      background: rgba(2, 6, 23, 0.45);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(31, 41, 55, 0.9);
+      color: #f9fafb;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /*
+      ============================================================
+      9. Utilitários visuais
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Classes pequenas reutilizáveis para textos, números,
+      indicadores e barras de progresso.
+    */
+    .muted {
+      color: var(--muted);
+    }
+
+    .number {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #bae6fd;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .progress {
+      height: 10px;
+      width: 160px;
+      background: #020617;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 6px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 40%, var(--accent-2) 70%, var(--accent-3) 100%);
+      width: 0%;
+    }
+
+    /*
+      ============================================================
+      10. Resumo principal
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Exibir cards rápidos para a referência selecionada.
+    */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .summary {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .summary-item {
+      background: rgba(2, 6, 23, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .summary-item small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .summary-item strong {
+      font-size: 20px;
+      transition: color 0.3s ease;
+    }
+
+    /*
+      ============================================================
+      11. Lista de referências editáveis
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Exibir as referências cadastradas e permitir edição direta.
+    */
+    .ref-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .ref-item {
+      display: grid;
+      grid-template-columns: 1fr 90px 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      margin-top: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    code {
+      color: #bae6fd;
+    }
+  </style>
+</head>
+
+<body>
+  <!--
+    ============================================================
+    Estrutura HTML da aplicação
+    ============================================================
+
+    Responsabilidade:
+    -----------------
+    Montar a interface principal usada pelo JavaScript.
+
+    Principais áreas:
+    -----------------
+    1. Painel de parâmetros.
+    2. Resumo da referência principal.
+    3. Tabela comparativa.
+    4. Lista de referências cadastradas.
+  -->
+
+  <div class="container">
+    <h1>Calculadora de Tempo Vivido e Expectativa de Vida</h1>
+
+    <p class="subtitle">
+      Informe a idade atual e compare com referências de expectativa de vida.
+      Os cálculos são estatísticos e servem apenas como estimativa.
+    </p>
+
+    <div class="grid">
+      <!--
+        ========================================================
+        Painel lateral
+        ========================================================
+
+        Responsabilidade:
+        -----------------
+        Reunir os campos de entrada e ações principais:
+        - idade atual;
+        - referência principal do resumo;
+        - inclusão de novas referências;
+        - restauração dos dados padrão.
+      -->
+      <section class="card">
+        <h2>Parâmetros</h2>
+
+        <div class="field">
+          <label for="idadeAtual">Idade atual</label>
+
+          <input
+            id="idadeAtual"
+            type="number"
+            min="0"
+            step="0.1"
+            value="46"
+          />
+        </div>
+
+        <div class="field">
+          <label for="referenciaResumo">
+            Referência principal do resumo
+          </label>
+
+          <select id="referenciaResumo"></select>
+        </div>
+
+        <div class="actions">
+          <button onclick="calcular()">Calcular</button>
+
+          <button
+            class="btn-secondary"
+            onclick="restaurarPadrao()"
+          >
+            Restaurar padrão
+          </button>
+        </div>
+
+        <hr
+          style="
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 18px 0;
+          "
+        />
+
+        <h2>Adicionar referência</h2>
+
+        <div class="field">
+          <label for="novaReferencia">Nome da referência</label>
+
+          <input
+            id="novaReferencia"
+            type="text"
+            placeholder="Ex: Japão — geral"
+          />
+        </div>
+
+        <div class="field">
+          <label for="novaExpectativa">
+            Expectativa média em anos
+          </label>
+
+          <input
+            id="novaExpectativa"
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder="Ex: 84.5"
+          />
+        </div>
+
+        <div class="actions">
+          <button
+            class="btn-success"
+            onclick="adicionarReferencia()"
+          >
+            Adicionar
+          </button>
+        </div>
+
+        <div class="footer-note">
+          Conversões usadas:
+          <br />
+          <code>meses = anos × 12</code>
+          <br />
+          <code>semanas = anos × 52,1429</code>
+          <br />
+          <code>dias = anos × 365,25</code>
+        </div>
+      </section>
+
+      <!--
+        ========================================================
+        Área principal
+        ========================================================
+
+        Responsabilidade:
+        -----------------
+        Exibir os resultados calculados.
+      -->
+      <main>
+        <section class="card">
+          <h2>Resumo da referência principal</h2>
+
+          <div id="resumoPrincipal" class="summary"></div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+          <h2>Tabela comparativa</h2>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Referência</th>
+                  <th>Expectativa média</th>
+                  <th>Tempo vivido</th>
+                  <th>% vivido</th>
+                  <th>Falta</th>
+                  <th>% restante</th>
+                </tr>
+              </thead>
+
+              <tbody id="tabelaResultado"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 16px;">
+          <h2>Referências cadastradas</h2>
+
+          <div id="listaReferencias" class="ref-list"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    /*
+      ============================================================
+      JavaScript da aplicação
+      ============================================================
+
+      Responsabilidade geral:
+      -----------------------
+      Controlar:
+      - dados padrão;
+      - armazenamento local;
+      - cálculos;
+      - renderização da interface;
+      - inclusão, edição e remoção das referências.
+    */
+
+    /*
+      ============================================================
+      1. Chave de armazenamento local
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Define o nome usado no localStorage para salvar as referências
+      personalizadas.
+
+      Observação:
+      -----------
+      Se esse valor for alterado, o navegador passará a usar outro
+      registro de armazenamento.
+    */
+    const STORAGE_KEY = "expectativaVidaReferenciasV1";
+
+    /*
+      ============================================================
+      2. Referências padrão
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Define os dados iniciais usados pela aplicação.
+
+      Estrutura:
+      ----------
+      nome:
+        Texto exibido na interface.
+
+      expectativa:
+        Expectativa média de vida em anos.
+    */
+    const referenciasPadrao = [
+      {
+        nome: "Média mundial geral",
+        expectativa: 73.8
+      },
+      {
+        nome: "Brasil — geral",
+        expectativa: 76.6
+      },
+      {
+        nome: "Homens — Brasil",
+        expectativa: 73.3
+      },
+      {
+        nome: "Mulheres — Brasil",
+        expectativa: 79.9
+      }
+    ];
+
+    /*
+      ============================================================
+      3. Estado principal da aplicação
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Guarda em memória a lista atual de referências.
+
+      Origem:
+      -------
+      - localStorage, se já houver dados salvos;
+      - referências padrão, se não houver dados salvos.
+    */
+    let referencias = carregarReferencias();
+
+    /*
+      ============================================================
+      Função: carregarReferencias
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Carregar as referências salvas no navegador.
+
+      Fluxo:
+      ------
+      1. Tenta ler os dados do localStorage.
+      2. Se não existir nada salvo, usa os dados padrão.
+      3. Se existir algo inválido ou corrompido, usa os dados padrão.
+      4. Se existir uma lista válida, retorna essa lista.
+
+      Retorno:
+      --------
+      Array de objetos no formato:
+      {
+        nome: string,
+        expectativa: number
+      }
+    */
+    function carregarReferencias() {
+      const salvo = localStorage.getItem(STORAGE_KEY);
+
+      if (!salvo) {
+        return [...referenciasPadrao];
+      }
+
+      try {
+        const dados = JSON.parse(salvo);
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+          return [...referenciasPadrao];
+        }
+
+        return dados;
+      } catch {
+        return [...referenciasPadrao];
+      }
+    }
+
+    /*
+      ============================================================
+      Função: salvarReferencias
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Persistir no localStorage a lista atual de referências.
+
+      Quando é chamada:
+      -----------------
+      - ao adicionar referência;
+      - ao editar referência;
+      - ao remover referência;
+      - ao restaurar padrão.
+    */
+    function salvarReferencias() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(referencias));
+    }
+
+    /*
+      ============================================================
+      Função: formatarNumero
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Formatar números decimais no padrão brasileiro.
+
+      Exemplo:
+      --------
+      76.6 vira "76,6"
+
+      Parâmetros:
+      -----------
+      valor:
+        Número a ser formatado.
+
+      casas:
+        Quantidade de casas decimais.
+        Valor padrão: 1.
+    */
+    function formatarNumero(valor, casas = 1) {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: casas,
+        maximumFractionDigits: casas
+      });
+    }
+
+    /*
+      ============================================================
+      Função: formatarInteiro
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Arredondar e formatar números inteiros no padrão brasileiro.
+
+      Exemplo:
+      --------
+      2398.5734 vira "2.399"
+    */
+    function formatarInteiro(valor) {
+      return Math.round(valor).toLocaleString("pt-BR");
+    }
+
+    /*
+      ============================================================
+      Função: obterCorProgresso
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Calcular dinamicamente a cor correspondente do final da barra
+      de progresso com base no percentual (de 0 a 100).
+      Utiliza a mesma lógica tricolor do CSS:
+      - 0% a 40%: Verde esmeralda sólido (#10b981)
+      - 40% a 70%: Interpolação linear entre verde e laranja (#f59e0b)
+      - 70% a 100%: Interpolação linear entre laranja e vermelho (#ef4444)
+
+      Parâmetros:
+      -----------
+      percentual:
+        Valor percentual (0 a 100).
+
+      Retorno:
+      --------
+      String formatada em rgb(r, g, b) correspondente à cor calculada.
+    */
+    function obterCorProgresso(percentual) {
+      const verde = { r: 16, g: 185, b: 129 };
+      const laranja = { r: 245, g: 158, b: 11 };
+      const vermelho = { r: 239, g: 68, b: 68 };
+
+      let r, g, b;
+
+      if (percentual <= 40) {
+        r = verde.r;
+        g = verde.g;
+        b = verde.b;
+      } else if (percentual <= 70) {
+        const t = (percentual - 40) / 30; // vai de 0 a 1
+        r = Math.round(verde.r + t * (laranja.r - verde.r));
+        g = Math.round(verde.g + t * (laranja.g - verde.g));
+        b = Math.round(verde.b + t * (laranja.b - verde.b));
+      } else {
+        const t = (percentual - 70) / 30; // vai de 0 a 1
+        r = Math.round(laranja.r + t * (vermelho.r - laranja.r));
+        g = Math.round(laranja.g + t * (vermelho.g - laranja.g));
+        b = Math.round(laranja.b + t * (vermelho.b - laranja.b));
+      }
+
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    /*
+      ============================================================
+      Função: converterTempo
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Converter uma quantidade de anos para:
+      - anos;
+      - meses;
+      - semanas;
+      - dias.
+
+      Fórmulas:
+      ---------
+      meses   = anos * 12
+      semanas = anos * 52,1429
+      dias    = anos * 365,25
+
+      Parâmetros:
+      -----------
+      anos:
+        Quantidade de anos a converter.
+
+      Retorno:
+      --------
+      Objeto com as conversões.
+    */
+    function converterTempo(anos) {
+      return {
+        anos,
+        meses: anos * 12,
+        semanas: anos * 52.1429,
+        dias: anos * 365.25
+      };
+    }
+
+    /*
+      ============================================================
+      Função: textoTempo
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Gerar o HTML textual usado nas colunas "Tempo vivido" e
+      "Falta".
+
+      Entrada:
+      --------
+      anos:
+        Valor em anos.
+
+      Saída:
+      ------
+      HTML contendo:
+      - anos;
+      - meses;
+      - semanas;
+      - dias.
+    */
+    function textoTempo(anos) {
+      const t = converterTempo(anos);
+
+      return `
+        <span class="number">${formatarNumero(t.anos)} anos</span><br />
+        ${formatarNumero(t.meses)} meses<br />
+        ${formatarInteiro(t.semanas)} semanas<br />
+        ${formatarInteiro(t.dias)} dias
+      `;
+    }
+
+    /*
+      ============================================================
+      Função: calcularLinha
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Calcular os dados de uma linha da tabela comparativa.
+
+      Calcula:
+      --------
+      - idade atual;
+      - expectativa média;
+      - tempo restante;
+      - percentual vivido;
+      - percentual restante.
+
+      Regras:
+      -------
+      - Se a idade atual for maior que a expectativa, o tempo restante
+        fica zero.
+      - O percentual vivido não passa de 100%.
+      - O percentual restante não fica negativo.
+
+      Parâmetros:
+      -----------
+      referencia:
+        Objeto contendo nome e expectativa.
+
+      idadeAtual:
+        Idade atual informada pelo usuário.
+
+      Retorno:
+      --------
+      Objeto calculado para uso na tabela e no resumo.
+    */
+    function calcularLinha(referencia, idadeAtual) {
+      const expectativa = referencia.expectativa;
+      const restante = Math.max(expectativa - idadeAtual, 0);
+
+      const percentualVivido =
+        expectativa > 0
+          ? Math.min((idadeAtual / expectativa) * 100, 100)
+          : 0;
+
+      const percentualRestante = Math.max(100 - percentualVivido, 0);
+
+      return {
+        nome: referencia.nome,
+        expectativa,
+        idadeAtual,
+        restante,
+        percentualVivido,
+        percentualRestante
+      };
+    }
+
+    /*
+      ============================================================
+      Função: calcular
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Função central da aplicação.
+
+      Ela:
+      ----
+      1. Lê a idade atual informada.
+      2. Valida se a idade é válida.
+      3. Atualiza o select de referências.
+      4. Renderiza a tabela comparativa.
+      5. Renderiza o resumo principal.
+      6. Renderiza a lista editável de referências.
+
+      Quando é chamada:
+      -----------------
+      - ao carregar a página;
+      - ao alterar a idade;
+      - ao trocar a referência principal;
+      - ao adicionar/editar/remover referências;
+      - ao clicar em "Calcular".
+    */
+    function calcular() {
+      const idadeAtual = Number(document.getElementById("idadeAtual").value);
+
+      if (Number.isNaN(idadeAtual) || idadeAtual < 0) {
+        alert("Informe uma idade atual válida.");
+        return;
+      }
+
+      atualizarSelectResumo();
+      renderizarTabela(idadeAtual);
+      renderizarResumoPrincipal(idadeAtual);
+      renderizarListaReferencias();
+    }
+
+    /*
+      ============================================================
+      Função: renderizarTabela
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Montar a tabela comparativa com base nas referências atuais.
+
+      Para cada referência:
+      ---------------------
+      - calcula os dados usando calcularLinha;
+      - cria uma linha <tr>;
+      - insere os valores formatados nas colunas;
+      - adiciona a barra visual de percentual vivido.
+    */
+    function renderizarTabela(idadeAtual) {
+      const tbody = document.getElementById("tabelaResultado");
+      tbody.innerHTML = "";
+
+      referencias.forEach((ref) => {
+        const linha = calcularLinha(ref, idadeAtual);
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>
+            <strong>${linha.nome}</strong>
+          </td>
+
+          <td>
+            <span class="pill">
+              ${formatarNumero(linha.expectativa)} anos
+            </span>
+          </td>
+
+          <td>
+            ${textoTempo(linha.idadeAtual)}
+          </td>
+
+          <td>
+            <strong style="color: ${obterCorProgresso(linha.percentualVivido)}">${formatarNumero(linha.percentualVivido)}%</strong>
+
+            <div class="progress">
+              <div
+                class="progress-bar"
+                style="width: ${linha.percentualVivido}%"
+              ></div>
+            </div>
+          </td>
+
+          <td>
+            ${textoTempo(linha.restante)}
+          </td>
+
+          <td>
+            <strong>${formatarNumero(linha.percentualRestante)}%</strong>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    /*
+      ============================================================
+      Função: renderizarResumoPrincipal
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Exibir os cards de resumo da referência selecionada no select.
+
+      Mostra:
+      -------
+      - nome da referência;
+      - expectativa média;
+      - tempo vivido;
+      - tempo restante;
+      - percentual vivido;
+      - percentual restante;
+      - semanas vividas;
+      - semanas restantes.
+    */
+    function renderizarResumoPrincipal(idadeAtual) {
+      const resumo = document.getElementById("resumoPrincipal");
+      const select = document.getElementById("referenciaResumo");
+
+      const index = Number(select.value) || 0;
+      const ref = referencias[index] || referencias[0];
+
+      const linha = calcularLinha(ref, idadeAtual);
+
+      resumo.innerHTML = `
+        <div class="summary-item">
+          <small>Referência</small>
+          <strong>${linha.nome}</strong>
+        </div>
+
+        <div class="summary-item">
+          <small>Expectativa média</small>
+          <strong>${formatarNumero(linha.expectativa)} anos</strong>
+        </div>
+
+        <div class="summary-item">
+          <small>Tempo vivido</small>
+          <strong>${formatarNumero(linha.idadeAtual)} anos</strong>
+
+          <div class="muted">
+            ${formatarNumero(linha.idadeAtual * 12)} meses
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <small>Tempo restante estimado</small>
+          <strong>${formatarNumero(linha.restante)} anos</strong>
+
+          <div class="muted">
+            ${formatarNumero(linha.restante * 12)} meses
+          </div>
+        </div>
+
+        <div class="summary-item">
+          <small>% vivido</small>
+          <strong style="color: ${obterCorProgresso(linha.percentualVivido)}">${formatarNumero(linha.percentualVivido)}%</strong>
+        </div>
+
+        <div class="summary-item">
+          <small>% restante</small>
+          <strong>${formatarNumero(linha.percentualRestante)}%</strong>
+        </div>
+
+        <div class="summary-item">
+          <small>Semanas vividas</small>
+          <strong>${formatarInteiro(linha.idadeAtual * 52.1429)}</strong>
+        </div>
+
+        <div class="summary-item">
+          <small>Semanas restantes</small>
+          <strong>${formatarInteiro(linha.restante * 52.1429)}</strong>
+        </div>
+      `;
+    }
+
+    /*
+      ============================================================
+      Função: atualizarSelectResumo
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Atualizar o select usado para escolher a referência principal
+      do resumo.
+
+      Regras:
+      -------
+      - Mantém a seleção anterior quando possível.
+      - Se não houver seleção anterior válida, tenta selecionar
+        "Brasil — geral".
+      - Se "Brasil — geral" não existir, seleciona a primeira referência.
+    */
+    function atualizarSelectResumo() {
+      const select = document.getElementById("referenciaResumo");
+      const valorAnterior = select.value;
+
+      select.innerHTML = "";
+
+      referencias.forEach((ref, index) => {
+        const option = document.createElement("option");
+
+        option.value = String(index);
+
+        option.textContent =
+          `${ref.nome} — ${formatarNumero(ref.expectativa)} anos`;
+
+        select.appendChild(option);
+      });
+
+      if (valorAnterior && referencias[Number(valorAnterior)]) {
+        select.value = valorAnterior;
+      } else {
+        const brasilGeralIndex = referencias.findIndex(
+          (ref) => ref.nome === "Brasil — geral"
+        );
+
+        select.value = String(brasilGeralIndex >= 0 ? brasilGeralIndex : 0);
+      }
+    }
+
+    /*
+      ============================================================
+      Função: renderizarListaReferencias
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Criar a lista editável das referências cadastradas.
+
+      Cada item possui:
+      -----------------
+      - input para alterar o nome;
+      - input para alterar a expectativa;
+      - botão para remover.
+    */
+    function renderizarListaReferencias() {
+      const lista = document.getElementById("listaReferencias");
+      lista.innerHTML = "";
+
+      referencias.forEach((ref, index) => {
+        const item = document.createElement("div");
+        item.className = "ref-item";
+
+        item.innerHTML = `
+          <input
+            type="text"
+            value="${ref.nome}"
+            onchange="editarNomeReferencia(${index}, this.value)"
+          />
+
+          <input
+            type="number"
+            min="0"
+            step="0.1"
+            value="${ref.expectativa}"
+            onchange="editarExpectativaReferencia(${index}, this.value)"
+          />
+
+          <button
+            class="btn-danger"
+            title="Remover"
+            onclick="removerReferencia(${index})"
+          >
+            X
+          </button>
+        `;
+
+        lista.appendChild(item);
+      });
+    }
+
+    /*
+      ============================================================
+      Função: adicionarReferencia
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Adicionar uma nova referência informada pelo usuário.
+
+      Validações:
+      -----------
+      - O nome não pode estar vazio.
+      - A expectativa precisa ser maior que zero.
+
+      Após adicionar:
+      ---------------
+      - limpa os campos;
+      - salva no localStorage;
+      - recalcula a interface.
+    */
+    function adicionarReferencia() {
+      const nomeInput = document.getElementById("novaReferencia");
+      const expectativaInput = document.getElementById("novaExpectativa");
+
+      const nome = nomeInput.value.trim();
+      const expectativa = Number(expectativaInput.value);
+
+      if (!nome) {
+        alert("Informe o nome da referência.");
+        return;
+      }
+
+      if (Number.isNaN(expectativa) || expectativa <= 0) {
+        alert("Informe uma expectativa válida em anos.");
+        return;
+      }
+
+      referencias.push({
+        nome,
+        expectativa
+      });
+
+      nomeInput.value = "";
+      expectativaInput.value = "";
+
+      salvarReferencias();
+      calcular();
+    }
+
+    /*
+      ============================================================
+      Função: editarNomeReferencia
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Alterar o nome de uma referência existente.
+
+      Validação:
+      ----------
+      O nome não pode ficar vazio.
+    */
+    function editarNomeReferencia(index, novoNome) {
+      const nome = String(novoNome).trim();
+
+      if (!nome) {
+        alert("O nome da referência não pode ficar vazio.");
+        calcular();
+        return;
+      }
+
+      referencias[index].nome = nome;
+
+      salvarReferencias();
+      calcular();
+    }
+
+    /*
+      ============================================================
+      Função: editarExpectativaReferencia
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Alterar a expectativa média de vida de uma referência existente.
+
+      Validação:
+      ----------
+      A expectativa precisa ser um número maior que zero.
+    */
+    function editarExpectativaReferencia(index, novoValor) {
+      const expectativa = Number(novoValor);
+
+      if (Number.isNaN(expectativa) || expectativa <= 0) {
+        alert("A expectativa precisa ser maior que zero.");
+        calcular();
+        return;
+      }
+
+      referencias[index].expectativa = expectativa;
+
+      salvarReferencias();
+      calcular();
+    }
+
+    /*
+      ============================================================
+      Função: removerReferencia
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Remover uma referência da lista.
+
+      Regra:
+      ------
+      A aplicação sempre precisa manter pelo menos uma referência.
+    */
+    function removerReferencia(index) {
+      if (referencias.length === 1) {
+        alert("É necessário manter pelo menos uma referência.");
+        return;
+      }
+
+      referencias.splice(index, 1);
+
+      salvarReferencias();
+      calcular();
+    }
+
+    /*
+      ============================================================
+      Função: restaurarPadrao
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Restaurar a lista original de referências.
+
+      Efeito:
+      -------
+      Substitui as referências atuais pelas referências padrão e salva
+      essa alteração no localStorage.
+    */
+    function restaurarPadrao() {
+      const confirmar = confirm(
+        "Deseja restaurar as referências padrão?"
+      );
+
+      if (!confirmar) {
+        return;
+      }
+
+      referencias = [...referenciasPadrao];
+
+      salvarReferencias();
+      calcular();
+    }
+
+    /*
+      ============================================================
+      Eventos da interface
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Conectar alterações feitas pelo usuário com o recálculo automático
+      da aplicação.
+    */
+
+    /*
+      Quando o usuário altera a idade, a tabela e o resumo são
+      recalculados automaticamente.
+    */
+    document
+      .getElementById("idadeAtual")
+      .addEventListener("input", calcular);
+
+    /*
+      Quando o usuário troca a referência principal, o resumo é
+      atualizado automaticamente.
+    */
+    document
+      .getElementById("referenciaResumo")
+      .addEventListener("change", calcular);
+
+    /*
+      ============================================================
+      Inicialização da aplicação
+      ============================================================
+
+      Responsabilidade:
+      -----------------
+      Preparar o select de referências e executar o primeiro cálculo
+      assim que a página for carregada.
+    */
+    atualizarSelectResumo();
+    calcular();
+  </script>
+</body>
+</html>
