@@ -482,9 +482,10 @@
         </div>
 
         <div class="actions">
-          <button onclick="calcular()">Calcular</button>
+          <button id="btnCalcular" onclick="calcular()">Calcular</button>
 
           <button
+            id="btnRestaurarPadrao"
             class="btn-secondary"
             onclick="restaurarPadrao()"
           >
@@ -528,6 +529,7 @@
 
         <div class="actions">
           <button
+            id="btnAdicionarReferencia"
             class="btn-success"
             onclick="adicionarReferencia()"
           >
@@ -991,17 +993,27 @@
       - ao clicar em "Calcular".
     */
     function calcular() {
-      const idadeAtual = Number(document.getElementById("idadeAtual").value);
+      const idadeAtualInput = document.getElementById("idadeAtual");
+      const idadeAtual = Number(idadeAtualInput.value);
 
       if (Number.isNaN(idadeAtual) || idadeAtual < 0) {
         alert("Informe uma idade atual válida.");
         return;
       }
 
+      // Persiste a idade atual no localStorage
+      localStorage.setItem("expectativaVidaIdadeAtualV1", String(idadeAtual));
+
       atualizarSelectResumo();
       renderizarTabela(idadeAtual);
       renderizarResumoPrincipal(idadeAtual);
       renderizarListaReferencias();
+
+      // Persiste a referência principal ativa no localStorage
+      const select = document.getElementById("referenciaResumo");
+      if (select && select.value !== "") {
+        localStorage.setItem("expectativaVidaReferenciaResumoV1", select.value);
+      }
     }
 
     /*
@@ -1166,7 +1178,8 @@
     */
     function atualizarSelectResumo() {
       const select = document.getElementById("referenciaResumo");
-      const valorAnterior = select.value;
+      // Tenta obter o valor do select do DOM ou recupera a última seleção do localStorage
+      const valorAnterior = select.value || localStorage.getItem("expectativaVidaReferenciaResumoV1");
 
       select.innerHTML = "";
 
@@ -1181,7 +1194,7 @@
         select.appendChild(option);
       });
 
-      if (valorAnterior && referencias[Number(valorAnterior)]) {
+      if (valorAnterior !== null && referencias[Number(valorAnterior)]) {
         select.value = valorAnterior;
       } else {
         const brasilGeralIndex = referencias.findIndex(
@@ -1217,12 +1230,14 @@
 
         item.innerHTML = `
           <input
+            id="refNome_${index}"
             type="text"
             value="${ref.nome}"
             onchange="editarNomeReferencia(${index}, this.value)"
           />
 
           <input
+            id="refExpectativa_${index}"
             type="number"
             min="0"
             step="0.1"
@@ -1231,6 +1246,7 @@
           />
 
           <button
+            id="btnRemover_${index}"
             class="btn-danger"
             title="Remover"
             onclick="removerReferencia(${index})"
@@ -1439,6 +1455,12 @@
       Preparar o select de referências e executar o primeiro cálculo
       assim que a página for carregada.
     */
+    // Recupera e define a idade atual salva antes de executar os cálculos iniciais
+    const idadeSalva = localStorage.getItem("expectativaVidaIdadeAtualV1");
+    if (idadeSalva !== null) {
+      document.getElementById("idadeAtual").value = idadeSalva;
+    }
+
     atualizarSelectResumo();
     calcular();
   </script>
